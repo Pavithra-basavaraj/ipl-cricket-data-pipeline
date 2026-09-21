@@ -1,1 +1,169 @@
+# Data Modeling — Star Schema
 
+## 1. Overview
+
+The Gold layer of the IPL data engineering pipeline uses dimensional data modeling to organize transformed cricket data for analytics and reporting.
+
+The model follows a Star Schema consisting of dimension tables and fact tables.
+
+The purpose of the model is to separate descriptive attributes from measurable business events and provide an analytics-ready structure for Power BI.
+
+---
+
+## 2. Data Modeling Flow
+
+```text
+CricAPI
+   ↓
+Bronze
+match_raw
+   ↓
+Silver
+silver_innings
+silver_match_innings
+   ↓
+Gold
+Dimension Tables + Fact Tables
+   ↓
+Power BI
+3. Star Schema
+
+The Gold layer is organized around fact tables connected to related dimension tables.
+
+Conceptually:
+
+              dim_date
+                 |
+                 |
+dim_team ─── fact_match ─── dim_venue
+                 |
+                 |
+            dim_player
+
+The dimensions provide descriptive context, while fact tables contain measurable cricket performance data.
+
+4. Dimension Tables
+
+The project uses dimension tables to store descriptive attributes used for analysis.
+
+Examples include:
+
+dim_date
+
+Stores date-related attributes used for time-based analysis.
+
+Possible analytical attributes include:
+
+Date
+Year
+Month
+Season
+dim_team
+
+Stores team-related descriptive attributes.
+
+Used for:
+
+Team analysis
+Match participation
+Team performance reporting
+dim_venue
+
+Stores venue-related attributes.
+
+Used for:
+
+Venue analysis
+Match location reporting
+Venue-level performance analysis
+dim_player
+
+Stores player-related attributes used for player performance analysis.
+
+5. Fact Tables
+
+Fact tables contain measurable events and performance metrics.
+
+The Gold layer is designed to support analytical questions such as:
+
+How many runs were scored?
+How many wickets were taken?
+Which team won a match?
+How did a player perform?
+What was the performance at a particular venue?
+How did performance change across seasons?
+6. Dimension and Fact Relationships
+
+The Star Schema allows fact records to be analyzed using different dimensions.
+
+For example:
+
+Fact Performance
+      |
+      +── Team
+      |
+      +── Player
+      |
+      +── Date
+      |
+      +── Venue
+
+This structure makes it easier for reporting tools to filter and aggregate cricket performance data.
+
+7. SCD Type 2
+
+Slowly Changing Dimension Type 2 is used where historical changes to dimension attributes need to be preserved.
+
+Instead of overwriting an existing dimension record, a new version of the record is created when the tracked attribute changes.
+
+Conceptually:
+
+Player / Team Attribute
+        ↓
+Existing Record
+        ↓
+Attribute Changes
+        ↓
+Close Previous Version
+        ↓
+Insert New Version
+
+A Type 2 implementation can use fields such as:
+
+effective_start_date
+effective_end_date
+is_current
+
+This allows historical versions to remain available for analysis.
+
+8. Why Star Schema?
+
+The Star Schema provides:
+
+Clear separation between facts and dimensions
+Simpler analytical queries
+Consistent dimensions for reporting
+Easier aggregation of performance metrics
+A business-friendly structure for Power BI
+Support for historical dimension analysis through SCD Type 2
+9. Gold Layer Purpose
+
+The Gold layer provides analytics-ready datasets for downstream reporting.
+
+The design follows the principle:
+
+Bronze = Raw
+Silver = Clean and Validated
+Gold   = Business / Analytics Ready
+
+The Gold layer should be the primary source for downstream BI reporting rather than directly querying Bronze or raw API data.
+
+10. Technologies
+Microsoft Fabric
+Fabric Lakehouse
+PySpark
+Delta Lake
+Star Schema
+Dimensional Data Modeling
+SCD Type 2
+Power BI
